@@ -69,7 +69,7 @@ class Mkpasswd
     if options.password
       $0 = $0 # this invocation will get rid of the command line arguments from the process list
     elsif options.read_from_stdin
-      options.password = $stdin.read.chomp!
+      options.password = $stdin.read.chomp
     else
       options.password = ask_password
     end
