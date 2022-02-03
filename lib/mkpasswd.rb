@@ -20,7 +20,7 @@ class Mkpasswd
 
   def initialize(args)
     self.options = OpenStruct.new
-    options.hashmethod = 'des'
+    options.hashmethod = 'sha-512'
     options.hasher     = HASHERS[options.hashmethod]
 
     OptionParser.new do |opts|
@@ -35,7 +35,7 @@ class Mkpasswd
           puts HASHERS.keys
           exit
         end
-        options.hashmethod = hasher.to_s
+        options.hashmethod = hasher.to_s.downcase
         options.hasher     = HASHERS[options.hashmethod]
         raise 'Invalid hash algorithm for -m/--method' if options.hasher.nil?
       end
@@ -43,6 +43,10 @@ class Mkpasswd
       opts.on('-S', '--salt [SALT]', String, 'Provide hash salt') do |salt|
         raise 'Invalid salt for -S/--salt' if salt.nil?
         options.salt = salt
+      end
+
+      opts.on('-s', 'Read input from stdin') do
+        options.read_from_stdin = true
       end
 
       opts.on('-R', '--rounds [ROUNDS]', Integer, 'Set number of hashing rounds (SHA256/SHA512 only)') do |rounds|
@@ -64,6 +68,8 @@ class Mkpasswd
     options.password = ARGV.shift
     if options.password
       $0 = $0 # this invocation will get rid of the command line arguments from the process list
+    elsif options.read_from_stdin
+      options.password = $stdin.read.chomp
     else
       options.password = ask_password
     end
